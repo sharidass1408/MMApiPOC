@@ -218,10 +218,10 @@ public class RestfulView {
     }
     
     private void insertData(UIResponse response) {
-
-    	JSONResponseData jsonResponseData =  convertJSONIntoJavaObject(response);
-    	if(jsonResponseData.isSuccess())
+    	if(response.getStatusCode() == 200) {
+    		JSONResponseData jsonResponseData =  convertJSONIntoJavaObject(response);
     		performInsert(jsonResponseData.getItems());
+    	}
     	
 	}
     
@@ -242,6 +242,7 @@ public class RestfulView {
 		inputSelections.add(mmtimeStampData.getFkPatient());
 		inputSelections.add(mmtimeStampData.getFkTechnician());
 		inputSelections.add(mmtimeStampData.getFkReviewEntityID());
+		inputSelections.add(mmtimeStampData.getFkTranscriberEntityID());
 		inputSelections.add(mmtimeStampData.getFkReferringPhysician());
 		inputSelections.add(mmtimeStampData.getModality());
 		inputSelections.add(mmtimeStampData.getExamRequested());
@@ -264,6 +265,7 @@ public class RestfulView {
 		inputSelections.add(mmtimeStampData.getTechComments());
 		inputSelections.add(mmtimeStampData.getOrderTakenBy());
 		inputSelections.add(mmtimeStampData.getOrderedOnLine());
+		inputSelections.add(mmtimeStampData.getStudyUID());
 		inputSelections.add(mmtimeStampData.getStudyDueTS());
 		inputSelections.add(mmtimeStampData.getOrigOrder());
 		inputSelections.add(mmtimeStampData.getFkFacility());
@@ -306,7 +308,7 @@ public class RestfulView {
 		inputSelections.add(mmtimeStampData.getFirstReportResultsPhonedTS());
 		inputSelections.add(mmtimeStampData.getCritFind());
 		
-		return (String[]) inputSelections.toArray();
+		return inputSelections.toArray(new String[0]);		
 	}
 	private String getInsertQuery() {
 

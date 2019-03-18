@@ -27,7 +27,7 @@ public class MMDao {
 				}
 			}
 			
-			prepareStatement.executeQuery();
+			prepareStatement.executeUpdate();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
