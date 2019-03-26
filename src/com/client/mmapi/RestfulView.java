@@ -15,6 +15,8 @@ import com.client.mmapi.webgateway.UIResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +74,16 @@ public class RestfulView {
                     dataMap.put(dt[0], dt[1]);
 
                 }
+                if(mess.equals("api_timestamp_data")) {
+                	LocalDate start = LocalDate.of(2018, Month.JANUARY, 2);
+                	LocalDate end = LocalDate.of(2018, Month.DECEMBER, 31);
+                	
+                	for(LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+                		dataMap.put("startdate",date.toString());
+                		runApiTest(mess, dataMap);
+                	}
+                	
+                }else
                 runApiTest(mess, dataMap);
                 
             } catch (IOException ex) {
