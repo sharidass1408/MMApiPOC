@@ -4,8 +4,10 @@
  * and open the template in the editor.
  */
 package com.client.mmapi;
-import com.client.mmapi.dao.JSONResponseData;
+import com.client.mmapi.dao.JSONFacilityResponseData;
+import com.client.mmapi.dao.JSONTimeStampResponseData;
 import com.client.mmapi.dao.MMDao;
+import com.client.mmapi.dao.MMFacilityData;
 import com.client.mmapi.dao.MMTimeStampData;
 import com.client.mmapi.dao.TimeStampData;
 import com.client.mmapi.utils.ConfigRestful;
@@ -220,8 +222,15 @@ public class RestfulView {
             case "xml":
                 RestfulStringResults strResults = new RestfulStringResults();
                 displayResults(strResults,response,apiMessage);
-                if(apiMessage.equals("api_timestamp_data")) {
-                	insertData(response);
+                if(response.getStatusCode() == 200) {
+            		
+	                if(apiMessage.equals("api_timestamp_data")) {
+	                	JSONTimeStampResponseData jsonTimeStampResponseData =  convertJSONIntoJavaObject(response);
+	                	insertTimeStampData(jsonTimeStampResponseData.getItems());
+	                } else if(apiMessage.equals("api_facility_id")) {
+	                	JSONFacilityResponseData jsonFacilityResponseData = convertJSONIntoJavaObjectForFacility(response);
+	                	insertFacilityInfoById(jsonFacilityResponseData.getItems());
+	                }
                 }
                 
                 
@@ -229,100 +238,166 @@ public class RestfulView {
         }
     }
     
-    private void insertData(UIResponse response) {
-    	if(response.getStatusCode() == 200) {
-    		JSONResponseData jsonResponseData =  convertJSONIntoJavaObject(response);
-    		performInsert(jsonResponseData.getItems());
-    	}
-    	
-	}
     
-    
-	private void performInsert(List<MMTimeStampData> items) {
+	private void insertFacilityInfoById(List<MMFacilityData> items) {
 		MMDao mmDao = new MMDao();
-		String   insertQuery = getInsertQuery();
+		String  insertFacilityByID = getInsertFacilityByIDQuery();
+		for(MMFacilityData mmFacilityData: items) {
+			String[] columnValues = getColumnValuesForFacilityInfo(mmFacilityData);
+			mmDao.insertDataUsingPrepStatement(insertFacilityByID, columnValues);
+		}
+		
+	}
+	
+	//Fixme: Replace this code with JPA
+	private String[] getColumnValuesForFacilityInfo(MMFacilityData mmFacilityData) {
+
+		List<String> columnValues= new ArrayList<>();
+		columnValues.add(mmFacilityData.getPkFacility());
+		columnValues.add(mmFacilityData.getFkCorpFacility());
+		columnValues.add(mmFacilityData.getFkDispatchRegion());
+		columnValues.add(mmFacilityData.getName());
+		columnValues.add(mmFacilityData.getAddr1());
+		columnValues.add(mmFacilityData.getAddr2());
+		columnValues.add(mmFacilityData.getCity());
+		columnValues.add(mmFacilityData.getState());
+		columnValues.add(mmFacilityData.getPostalCode());
+		columnValues.add(mmFacilityData.getCounty());
+		columnValues.add(mmFacilityData.getPhone());
+		columnValues.add(mmFacilityData.getFax());
+		columnValues.add(mmFacilityData.getEmail());
+		columnValues.add(mmFacilityData.getMaxUsers());
+		columnValues.add(mmFacilityData.getNursingContact());
+		columnValues.add(mmFacilityData.getBillingContact());
+		columnValues.add(mmFacilityData.getBillingAddr1());
+		columnValues.add(mmFacilityData.getBillingAddr2());
+		columnValues.add(mmFacilityData.getBillingCity());
+		columnValues.add(mmFacilityData.getBillingState());
+		columnValues.add(mmFacilityData.getBillingPostalCode());
+		columnValues.add(mmFacilityData.getFinanceChargePct());
+		columnValues.add(mmFacilityData.getPricingSchedule());
+		columnValues.add(mmFacilityData.getPlaceOfServiceCode());
+		columnValues.add(mmFacilityData.getFacilityComments());
+		columnValues.add(mmFacilityData.getBedCount());
+		columnValues.add(mmFacilityData.getFacilityNPI());
+		columnValues.add(mmFacilityData.getStatusFlag());
+		columnValues.add(mmFacilityData.getBillingEmail());
+		columnValues.add(mmFacilityData.getBillingPhone());
+		columnValues.add(mmFacilityData.getAdminContact());
+		columnValues.add(mmFacilityData.getAdminEmail());
+		columnValues.add(mmFacilityData.getStartDate());
+		columnValues.add(mmFacilityData.getIdtfDiscountPct());
+		columnValues.add(mmFacilityData.getXrayDiscountPct());
+		columnValues.add(mmFacilityData.getEkgDiscountPct());
+		columnValues.add(mmFacilityData.getTransDiscountPct());
+		columnValues.add(mmFacilityData.getSetupDiscountPct());
+		columnValues.add(mmFacilityData.getSpecialDiscountPct());
+		columnValues.add(mmFacilityData.getReportExportFlag());
+		columnValues.add(mmFacilityData.getProviderSalesRep());
+		columnValues.add(mmFacilityData.getProviderServiceRep());		
+		columnValues.add(mmFacilityData.getEmrStatusFlag());
+		columnValues.add(mmFacilityData.getEmrHoldForReview());
+		columnValues.add(mmFacilityData.getFkEMR());
+		columnValues.add(mmFacilityData.getEmrName());
+		columnValues.add(mmFacilityData.getPatientsReqInsFlag());
+		columnValues.add(mmFacilityData.getDefaultRG());
+		columnValues.add(mmFacilityData.getLat());
+		columnValues.add(mmFacilityData.getLon());
+		columnValues.add(mmFacilityData.getOrderScript());
+		
+		return columnValues.toArray(new String[0]);
+	}
+	
+	
+	private String getInsertFacilityByIDQuery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	private void insertTimeStampData(List<MMTimeStampData> items) {
+		MMDao mmDao = new MMDao();
+		String   insertTimeStampQuery = getInsertTimeStampQuery();
 		for(MMTimeStampData mmtimeStampData: items) {
-			String[] inputSelections = getInputSelections(mmtimeStampData);
-			mmDao.insertDataUsingPrepStatement(insertQuery, inputSelections);
+			String[] columnValues = getColumnValues(mmtimeStampData);
+			mmDao.insertDataUsingPrepStatement(insertTimeStampQuery, columnValues);
 		}
 	}
 	
-	private String[] getInputSelections(MMTimeStampData mmtimeStampData) {
+	private String[] getColumnValues(MMTimeStampData mmtimeStampData) {
 		
-		List<String> inputSelections= new ArrayList<>();
-		inputSelections.add(mmtimeStampData.getPkExam());
-		inputSelections.add(mmtimeStampData.getFkPatient());
-		inputSelections.add(mmtimeStampData.getFkTechnician());
-		inputSelections.add(mmtimeStampData.getFkReviewEntityID());
-		inputSelections.add(mmtimeStampData.getFkTranscriberEntityID());
-		inputSelections.add(mmtimeStampData.getFkReferringPhysician());
-		inputSelections.add(mmtimeStampData.getModality());
-		inputSelections.add(mmtimeStampData.getExamRequested());
-		inputSelections.add(mmtimeStampData.getReasonOrdered());
-		inputSelections.add(mmtimeStampData.getScheduleServiceDate());
-		inputSelections.add(mmtimeStampData.getServicePriority());
-		inputSelections.add(mmtimeStampData.getProcedureType());
-		inputSelections.add(mmtimeStampData.getNumPatientSeen());
-		inputSelections.add(mmtimeStampData.getOrderPersonName());
-		inputSelections.add(mmtimeStampData.getOrderTS());
-		inputSelections.add(mmtimeStampData.getOrderAssignedTS());
-		inputSelections.add(mmtimeStampData.getOrderCompleteTS());
-		inputSelections.add(mmtimeStampData.getResultsPhonedToNumber());
-		inputSelections.add(mmtimeStampData.getTechConfirmed());
-		inputSelections.add(mmtimeStampData.getJobProgress());
-		inputSelections.add(mmtimeStampData.getExamComments());
-		inputSelections.add(mmtimeStampData.getModuleMask());
-		inputSelections.add(mmtimeStampData.getCptCountProvider());
-		inputSelections.add(mmtimeStampData.getCptCountRadiologist());
-		inputSelections.add(mmtimeStampData.getTechComments());
-		inputSelections.add(mmtimeStampData.getOrderTakenBy());
-		inputSelections.add(mmtimeStampData.getOrderedOnLine());
-		inputSelections.add(mmtimeStampData.getStudyUID());
-		inputSelections.add(mmtimeStampData.getStudyDueTS());
-		inputSelections.add(mmtimeStampData.getOrigOrder());
-		inputSelections.add(mmtimeStampData.getFkFacility());
-		inputSelections.add(mmtimeStampData.getRefBatchNum());
-		inputSelections.add(mmtimeStampData.getRefSignedFlag());
-		inputSelections.add(mmtimeStampData.getRefTimes());
-		inputSelections.add(mmtimeStampData.getAutoFaxNumber());
-		inputSelections.add(mmtimeStampData.getPractitioner());
-		inputSelections.add(mmtimeStampData.getScheduleServiceTime());
-		inputSelections.add(mmtimeStampData.getImageViews());
-		inputSelections.add(mmtimeStampData.getImageRetakes());
-		inputSelections.add(mmtimeStampData.getRetakeReason());
-		inputSelections.add(mmtimeStampData.getEmrOrderid());
-		inputSelections.add(mmtimeStampData.getMedNecessity());
-		inputSelections.add(mmtimeStampData.getEmrSanityError());
-		inputSelections.add(mmtimeStampData.getTechArriveTS());
-		inputSelections.add(mmtimeStampData.getTechDispatchedBy());
-		inputSelections.add(mmtimeStampData.getPriorAuthorization());
-		inputSelections.add(mmtimeStampData.getETX());
-		inputSelections.add(mmtimeStampData.getPatientFirstName());
-		inputSelections.add(mmtimeStampData.getPatientDob());
-		inputSelections.add(mmtimeStampData.getPatientRoomNum());
-		inputSelections.add(mmtimeStampData.getStudyID());
-		inputSelections.add(mmtimeStampData.getAccessionNumber());
-		inputSelections.add(mmtimeStampData.getFacilityName());
-		inputSelections.add(mmtimeStampData.getTechLast());
-		inputSelections.add(mmtimeStampData.getTechFirst());
-		inputSelections.add(mmtimeStampData.getRegionName());
-		inputSelections.add(mmtimeStampData.getCorpName());
-		inputSelections.add(mmtimeStampData.getReferLast());
-		inputSelections.add(mmtimeStampData.getReferFirst());
-		inputSelections.add(mmtimeStampData.getReferSuffix());
-		inputSelections.add(mmtimeStampData.getReferPhysicianID());
-		inputSelections.add(mmtimeStampData.getReferTaxonomyCode());
-		inputSelections.add(mmtimeStampData.getFirstReportDocID());
-		inputSelections.add(mmtimeStampData.getFirstImageUploadTS());
-		inputSelections.add(mmtimeStampData.getFirstReportTranscribeTS());
-		inputSelections.add(mmtimeStampData.getFirstReportReviewedByDoctor());
-		inputSelections.add(mmtimeStampData.getFirstReportFaxedTS());
-		inputSelections.add(mmtimeStampData.getFirstReportResultsPhonedTS());
-		inputSelections.add(mmtimeStampData.getCritFind());
+		List<String> columnValues= new ArrayList<>();
+		columnValues.add(mmtimeStampData.getPkExam());
+		columnValues.add(mmtimeStampData.getFkPatient());
+		columnValues.add(mmtimeStampData.getFkTechnician());
+		columnValues.add(mmtimeStampData.getFkReviewEntityID());
+		columnValues.add(mmtimeStampData.getFkTranscriberEntityID());
+		columnValues.add(mmtimeStampData.getFkReferringPhysician());
+		columnValues.add(mmtimeStampData.getModality());
+		columnValues.add(mmtimeStampData.getExamRequested());
+		columnValues.add(mmtimeStampData.getReasonOrdered());
+		columnValues.add(mmtimeStampData.getScheduleServiceDate());
+		columnValues.add(mmtimeStampData.getServicePriority());
+		columnValues.add(mmtimeStampData.getProcedureType());
+		columnValues.add(mmtimeStampData.getNumPatientSeen());
+		columnValues.add(mmtimeStampData.getOrderPersonName());
+		columnValues.add(mmtimeStampData.getOrderTS());
+		columnValues.add(mmtimeStampData.getOrderAssignedTS());
+		columnValues.add(mmtimeStampData.getOrderCompleteTS());
+		columnValues.add(mmtimeStampData.getResultsPhonedToNumber());
+		columnValues.add(mmtimeStampData.getTechConfirmed());
+		columnValues.add(mmtimeStampData.getJobProgress());
+		columnValues.add(mmtimeStampData.getExamComments());
+		columnValues.add(mmtimeStampData.getModuleMask());
+		columnValues.add(mmtimeStampData.getCptCountProvider());
+		columnValues.add(mmtimeStampData.getCptCountRadiologist());
+		columnValues.add(mmtimeStampData.getTechComments());
+		columnValues.add(mmtimeStampData.getOrderTakenBy());
+		columnValues.add(mmtimeStampData.getOrderedOnLine());
+		columnValues.add(mmtimeStampData.getStudyUID());
+		columnValues.add(mmtimeStampData.getStudyDueTS());
+		columnValues.add(mmtimeStampData.getOrigOrder());
+		columnValues.add(mmtimeStampData.getFkFacility());
+		columnValues.add(mmtimeStampData.getRefBatchNum());
+		columnValues.add(mmtimeStampData.getRefSignedFlag());
+		columnValues.add(mmtimeStampData.getRefTimes());
+		columnValues.add(mmtimeStampData.getAutoFaxNumber());
+		columnValues.add(mmtimeStampData.getPractitioner());
+		columnValues.add(mmtimeStampData.getScheduleServiceTime());
+		columnValues.add(mmtimeStampData.getImageViews());
+		columnValues.add(mmtimeStampData.getImageRetakes());
+		columnValues.add(mmtimeStampData.getRetakeReason());
+		columnValues.add(mmtimeStampData.getEmrOrderid());
+		columnValues.add(mmtimeStampData.getMedNecessity());
+		columnValues.add(mmtimeStampData.getEmrSanityError());
+		columnValues.add(mmtimeStampData.getTechArriveTS());
+		columnValues.add(mmtimeStampData.getTechDispatchedBy());
+		columnValues.add(mmtimeStampData.getPriorAuthorization());
+		columnValues.add(mmtimeStampData.getETX());
+		columnValues.add(mmtimeStampData.getPatientFirstName());
+		columnValues.add(mmtimeStampData.getPatientDob());
+		columnValues.add(mmtimeStampData.getPatientRoomNum());
+		columnValues.add(mmtimeStampData.getStudyID());
+		columnValues.add(mmtimeStampData.getAccessionNumber());
+		columnValues.add(mmtimeStampData.getFacilityName());
+		columnValues.add(mmtimeStampData.getTechLast());
+		columnValues.add(mmtimeStampData.getTechFirst());
+		columnValues.add(mmtimeStampData.getRegionName());
+		columnValues.add(mmtimeStampData.getCorpName());
+		columnValues.add(mmtimeStampData.getReferLast());
+		columnValues.add(mmtimeStampData.getReferFirst());
+		columnValues.add(mmtimeStampData.getReferSuffix());
+		columnValues.add(mmtimeStampData.getReferPhysicianID());
+		columnValues.add(mmtimeStampData.getReferTaxonomyCode());
+		columnValues.add(mmtimeStampData.getFirstReportDocID());
+		columnValues.add(mmtimeStampData.getFirstImageUploadTS());
+		columnValues.add(mmtimeStampData.getFirstReportTranscribeTS());
+		columnValues.add(mmtimeStampData.getFirstReportReviewedByDoctor());
+		columnValues.add(mmtimeStampData.getFirstReportFaxedTS());
+		columnValues.add(mmtimeStampData.getFirstReportResultsPhonedTS());
+		columnValues.add(mmtimeStampData.getCritFind());
 		
-		return inputSelections.toArray(new String[0]);		
+		return columnValues.toArray(new String[0]);		
 	}
-	private String getInsertQuery() {
+	private String getInsertTimeStampQuery() {
 
 		String insertQuery =
 				new String("INSERT INTO mmapi_timestamp_data "
@@ -339,16 +414,42 @@ public class RestfulView {
 		
 		return insertQuery;				
 	}
-	private JSONResponseData convertJSONIntoJavaObject(UIResponse response) {
+	
+	private JSONTimeStampResponseData convertJSONIntoJavaObject(UIResponse response) {
 	
 		
 		Object data = response.getData();
 		
 		ObjectMapper ob_Objectmapper = new ObjectMapper();
 		
-		JSONResponseData jsonResponseData = new JSONResponseData();
+		JSONTimeStampResponseData jsonResponseData = new JSONTimeStampResponseData();
 		try {
-			jsonResponseData = ob_Objectmapper.readValue(data.toString(),JSONResponseData.class);
+			jsonResponseData = ob_Objectmapper.readValue(data.toString(),JSONTimeStampResponseData.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return jsonResponseData;
+	}
+	
+	//FIXME: Use generics instead of this bad code.
+	private JSONFacilityResponseData convertJSONIntoJavaObjectForFacility(UIResponse response) {
+	
+		
+		Object data = response.getData();
+		
+		ObjectMapper ob_Objectmapper = new ObjectMapper();
+		
+		JSONFacilityResponseData jsonResponseData = new JSONFacilityResponseData();
+		try {
+			jsonResponseData = ob_Objectmapper.readValue(data.toString(),JSONFacilityResponseData.class);
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

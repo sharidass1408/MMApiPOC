@@ -2,7 +2,7 @@ package com.client.mmapi.dao;
 
 import java.util.List;
 
-public class JSONResponseData {
+public class JSONTimeStampResponseData {
 	
 	boolean success;
 	
