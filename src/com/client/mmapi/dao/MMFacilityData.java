@@ -1,5 +1,8 @@
 package com.client.mmapi.dao;
 
+import java.util.Date;
+
+//api_facility_id,pkFacility=653
 public class MMFacilityData {
 
 	String pkFacility;
@@ -34,7 +37,7 @@ public class MMFacilityData {
 	String billingPhone;
 	String adminContact;
 	String adminEmail;
-	String startDate;
+	Date startDate;
 	String idtfDiscountPct;
 	String xrayDiscountPct;
 	String ekgDiscountPct;
@@ -240,10 +243,12 @@ public class MMFacilityData {
 	public void setAdminEmail(String adminEmail) {
 		this.adminEmail = adminEmail;
 	}
-	public String getStartDate() {
+	
+	
+	public Date getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(String startDate) {
+	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
 	public String getIdtfDiscountPct() {
