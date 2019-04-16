@@ -1,4 +1,4 @@
-CREATE TABLE `mmapi_timestamp_data` (
+CREATE TABLE `mmapi_facility_data` (
   `pkFacility` int(11) NOT NULL,
   `fkCorpFacility` varchar(45) DEFAULT NULL,
   `fkDispatchRegion` varchar(45) DEFAULT NULL,
