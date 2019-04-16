@@ -241,7 +241,7 @@ public class RestfulView {
     
 	private void insertFacilityInfoById(List<MMFacilityData> items) {
 		MMDao mmDao = new MMDao();
-		String  insertFacilityByID = getInsertFacilityByIDQuery();
+		String  insertFacilityByID = null;//getInsertFacilityByIDQuery();
 		for(MMFacilityData mmFacilityData: items) {
 			String[] columnValues = getColumnValuesForFacilityInfo(mmFacilityData);
 			mmDao.insertDataUsingPrepStatement(insertFacilityByID, columnValues);
@@ -285,7 +285,7 @@ public class RestfulView {
 		columnValues.add(mmFacilityData.getBillingPhone());
 		columnValues.add(mmFacilityData.getAdminContact());
 		columnValues.add(mmFacilityData.getAdminEmail());
-		columnValues.add(mmFacilityData.getStartDate());
+		columnValues.add(mmFacilityData.getStartDate().toString());
 		columnValues.add(mmFacilityData.getIdtfDiscountPct());
 		columnValues.add(mmFacilityData.getXrayDiscountPct());
 		columnValues.add(mmFacilityData.getEkgDiscountPct());
@@ -309,10 +309,12 @@ public class RestfulView {
 	}
 	
 	
-	private String getInsertFacilityByIDQuery() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	/*
+	 * private String getInsertFacilityByIDQuery() { String insertQuery = new
+	 * String("INSERT INTO mmapi_facility_data " +
+	 * 
+	 * return insertQuery; }
+	 */
 	private void insertTimeStampData(List<MMTimeStampData> items) {
 		MMDao mmDao = new MMDao();
 		String   insertTimeStampQuery = getInsertTimeStampQuery();
