@@ -4,24 +4,22 @@
  * and open the template in the editor.
  */
 package com.client.mmapi;
-import com.client.mmapi.dao.JSONFacilityResponseData;
-import com.client.mmapi.dao.JSONTimeStampResponseData;
-import com.client.mmapi.dao.MMDao;
-import com.client.mmapi.dao.MMFacilityData;
-import com.client.mmapi.dao.MMTimeStampData;
-import com.client.mmapi.dao.TimeStampData;
-import com.client.mmapi.utils.ConfigRestful;
-import com.client.mmapi.utils.NameValuePairs;
-import com.client.mmapi.utils.TestException;
-import com.client.mmapi.webgateway.UIResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -30,6 +28,17 @@ import java.util.logging.Logger;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+
+import com.client.mmapi.dao.JSONFacilityResponseData;
+import com.client.mmapi.dao.JSONTimeStampResponseData;
+import com.client.mmapi.dao.MMDao;
+import com.client.mmapi.dao.MMFacilityData;
+import com.client.mmapi.dao.MMTimeStampData;
+import com.client.mmapi.utils.ConfigRestful;
+import com.client.mmapi.utils.NameValuePairs;
+import com.client.mmapi.utils.TestException;
+import com.client.mmapi.webgateway.UIResponse;
+
 
 /**
  *
@@ -240,12 +249,12 @@ public class RestfulView {
     
     
 	private void insertFacilityInfoById(List<MMFacilityData> items) {
-		MMDao mmDao = new MMDao();
-		String  insertFacilityByID = null;//getInsertFacilityByIDQuery();
-		for(MMFacilityData mmFacilityData: items) {
-			String[] columnValues = getColumnValuesForFacilityInfo(mmFacilityData);
-			mmDao.insertDataUsingPrepStatement(insertFacilityByID, columnValues);
-		}
+		/*
+		 * MMDao mmDao = new MMDao(); String insertFacilityByID =
+		 * getInsertFacilityByIDQuery(); for(MMFacilityData mmFacilityData: items) {
+		 * String[] columnValues = getColumnValuesForFacilityInfo(mmFacilityData);
+		 * mmDao.insertDataUsingPrepStatement(insertFacilityByID, columnValues); }
+		 */
 		
 	}
 	
@@ -319,14 +328,14 @@ public class RestfulView {
 		MMDao mmDao = new MMDao();
 		String   insertTimeStampQuery = getInsertTimeStampQuery();
 		for(MMTimeStampData mmtimeStampData: items) {
-			String[] columnValues = getColumnValues(mmtimeStampData);
+			Object[] columnValues = getColumnValues(mmtimeStampData);
 			mmDao.insertDataUsingPrepStatement(insertTimeStampQuery, columnValues);
 		}
 	}
 	
-	private String[] getColumnValues(MMTimeStampData mmtimeStampData) {
+	private Object[] getColumnValues(MMTimeStampData mmtimeStampData) {
 		
-		List<String> columnValues= new ArrayList<>();
+		List<Object> columnValues= new ArrayList<>();
 		columnValues.add(mmtimeStampData.getPkExam());
 		columnValues.add(mmtimeStampData.getFkPatient());
 		columnValues.add(mmtimeStampData.getFkTechnician());
@@ -341,9 +350,10 @@ public class RestfulView {
 		columnValues.add(mmtimeStampData.getProcedureType());
 		columnValues.add(mmtimeStampData.getNumPatientSeen());
 		columnValues.add(mmtimeStampData.getOrderPersonName());
-		columnValues.add(mmtimeStampData.getOrderTS());
-		columnValues.add(mmtimeStampData.getOrderAssignedTS());
-		columnValues.add(mmtimeStampData.getOrderCompleteTS());
+		
+		columnValues.add(convertToSmallDatetimeFormat(mmtimeStampData.getOrderTS()));
+		columnValues.add(convertToSmallDatetimeFormat(mmtimeStampData.getOrderAssignedTS()));
+		columnValues.add(convertToSmallDatetimeFormat(mmtimeStampData.getOrderCompleteTS()));
 		columnValues.add(mmtimeStampData.getResultsPhonedToNumber());
 		columnValues.add(mmtimeStampData.getTechConfirmed());
 		columnValues.add(mmtimeStampData.getJobProgress());
@@ -374,6 +384,7 @@ public class RestfulView {
 		columnValues.add(mmtimeStampData.getTechDispatchedBy());
 		columnValues.add(mmtimeStampData.getPriorAuthorization());
 		columnValues.add(mmtimeStampData.getETX());
+		columnValues.add(mmtimeStampData.getPatientLastName());
 		columnValues.add(mmtimeStampData.getPatientFirstName());
 		columnValues.add(mmtimeStampData.getPatientDob());
 		columnValues.add(mmtimeStampData.getPatientRoomNum());
@@ -397,20 +408,106 @@ public class RestfulView {
 		columnValues.add(mmtimeStampData.getFirstReportResultsPhonedTS());
 		columnValues.add(mmtimeStampData.getCritFind());
 		
-		return columnValues.toArray(new String[0]);		
+		return columnValues.toArray(new Object[0]);		
 	}
+
+	private static java.sql.Timestamp convertToSmallDatetimeFormat(String originalDate) {
+		
+		  
+		 
+		/*
+		 * DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+		 * .parseCaseInsensitive() .appendPattern("MM/dd/yyyy hh:mm:ss a")
+		 * .toFormatter(Locale.US); LocalDateTime localDate =
+		 * LocalDateTime.parse(originalDate,formatter);
+		 * System.out.println("****"+localDate); System.out.println("Converted Value: "+
+		 * Timestamp.valueOf(localDate));
+		 * 
+		 * return Timestamp.valueOf(localDate);
+		 */
+		SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss a", Locale.US);
+		try {
+			java.util.Date date = formatter.parse(originalDate);
+			return new java.sql.Timestamp(date.getTime());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+		
 	private String getInsertTimeStampQuery() {
 
 		String insertQuery =
 				new String("INSERT INTO mmapi_timestamp_data "
-			 + "(pkExam,fkPatient,fkTechnician, fkReviewEntityID, fkTranscriberEntityID,fkReferringPhysician,modality,examRequested, reasonOrdered," + 
-				"scheduleServiceDate,servicePriority, procedureType, numPatientSeen, orderPersonName, orderTS, orderAssignedTS,orderCompleteTS, " + 
-				"resultsPhonedToNumber, techConfirmed, jobProgress, examComments, moduleMask,cptCountProvider, cptCountRadiologist, techComments," + 
-				" orderTakenBy, orderedOnLine,studyDueTS,studyUID,origOrder,fkFacility, refBatchNum, refSignedFlag, refTimes,autoFaxNumber, " + 
-				"practitioner,scheduleServiceTime,imageViews,imageRetakes, retakeReason,emrOrderid,medNecessity,emrSanityError,techArriveTS," + 
-				"techDispatchedBy,priorAuthorization,ETX, patientFirstName, patientDob, patientRoomNum, studyID, accessionNumber,facilityName," + 
-				" techLast,  techFirst, regionName, corpName, referLast, referFirst,referSuffix,referPhysicianID,referTaxonomyCode, firstReportDocID," + 
-				" firstImageUploadTS, firstReportTranscribeTS, firstReportReviewedByDoctor, firstReportFaxedTS, firstReportResultsPhonedTS, critFind)" + 
+			 + "(pkExam,"
+			 + "fkPatient,"
+			 + "fkTechnician, "
+			 + "fkReviewEntityID, "
+			 + "fkTranscriberEntityID,"
+			 + "fkReferringPhysician,"
+			 + "modality,"
+			 + "examRequested,"
+			 + " reasonOrdered," + 
+				"scheduleServiceDate,"
+				+ "servicePriority,"
+				+ " procedureType,"
+				+ " numPatientSeen,"
+				+ " orderPersonName,"
+				+ " orderTS,"
+				+ " orderAssignedTS,"
+				+ "orderCompleteTS, " + 
+				"resultsPhonedToNumber,"
+				+ " techConfirmed,"
+				+ " jobProgress,"
+				+ " examComments,"
+				+ " moduleMask,"
+				+ "cptCountProvider, "
+				+ "cptCountRadiologist, "
+				+ "techComments," + 
+				" orderTakenBy,"
+				+ " orderedOnLine,"
+				+ "studyDueTS,"
+				+ "studyUID,"
+				+ "origOrder,"
+				+ "fkFacility, "
+				+ "refBatchNum,"
+				+ " refSignedFlag, "
+				+ "refTimes,autoFaxNumber, " + 
+				"practitioner,"
+				+ "scheduleServiceTime,"
+				+ "imageViews,imageRetakes,"
+				+ " retakeReason,"
+				+ "emrOrderid,"
+				+ "medNecessity,"
+				+ "emrSanityError,"
+				+ "techArriveTS," + 
+				"techDispatchedBy,"
+				+ "priorAuthorization,"
+				+ "ETX, "
+				+ "patientFirstName, "
+				+ "patientDob,"
+				+ " patientRoomNum,"
+				+ "studyID, "
+				+ "accessionNumber,"
+				+ "facilityName," + 
+				" techLast,"
+				+ "  techFirst,"
+				+ " regionName, "
+				+ "corpName, "
+				+ "referLast, "
+				+ "referFirst,"
+				+ "referSuffix,"
+				+ "referPhysicianID,"
+				+ "referTaxonomyCode,"
+				+ " firstReportDocID," + 
+				" firstImageUploadTS,"
+				+ " firstReportTranscribeTS,"
+				+ " firstReportReviewedByDoctor,"
+				+ " firstReportFaxedTS, "
+				+ "firstReportResultsPhonedTS,"
+				+ " critFind)" + 
 				"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 				
 		

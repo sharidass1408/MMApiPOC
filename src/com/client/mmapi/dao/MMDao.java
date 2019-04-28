@@ -42,17 +42,30 @@ public class MMDao {
 		}
 	}
 	
-	public void insertDataUsingPrepStatement(String query, String... inputSelections) {
+	//api_timestamp_data,startdate=01-01-2018,enddate=01-12-2018
+	public void insertDataUsingPrepStatement(String query, Object... inputSelections) {
 		
 		try {
 			PreparedStatement prepareStatement = con.prepareStatement(query);
 			if(inputSelections != null ) {
-				for(int i=0; i <inputSelections.length; i++) {
-					prepareStatement.setString(i+1, inputSelections[i]);
+				System.out.println(inputSelections.toString());
+				for(int i= 1,j=0; i < inputSelections.length; i++,j++) {
+					if(inputSelections[j] instanceof Timestamp) {
+						prepareStatement.setTimestamp(i, (java.sql.Timestamp)inputSelections[j]);
+					}else {
+						prepareStatement.setString(i, (String)inputSelections[j]);
+					}
+					if(inputSelections[j]==null) {
+						System.out.println(j+" - "+inputSelections[j]);
+					} else {
+						System.out.println(j+" - "+inputSelections[j]+" - "+inputSelections[j].getClass().getSimpleName());
+					}
 				}
 			}
+			System.out.println(prepareStatement.toString());
 			
 			prepareStatement.executeUpdate();
+			
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
