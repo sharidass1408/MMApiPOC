@@ -1,9 +1,11 @@
 package com.client.mmapi.dao;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
-import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
+//import com.microsoft.sqlserver.jdbc.SQLServerDataSource;
 
 public class MMDao {
 	
@@ -14,15 +16,12 @@ public class MMDao {
 		try {
 			//1. Get a connection to database
 			//con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mmapi_schema","mmapi_admin", "MmapiAdmin!408");
-			//con = DriverManager.getConnection("jdbc:sqlserver://localhost:49688/mmapi_schema","sa", "2305");
-			/*
-			String dbURL = "jdbc:sqlserver://localhost\\sqlexpress/dbo";
-			String user = "sa";
-			String pass = "2305";
-			con = DriverManager.getConnection(dbURL, user, pass);*/
 			
-			 
-	            String serverName = "localhost";
+			//For AWS 
+			con = DriverManager.getConnection("jdbc:mysql://rds-mysql-webmobilez.c0jdxqcv8cyj.us-east-2.rds.amazonaws.com:3306/sys","webmobilezAdmin", "WebmobileZ123");
+			
+			 //MS SQL statements
+	           /* String serverName = "localhost";
 	            String portNumber = "49688";
 	            String databaseName = "UXI";
 	            String username = "sa";
@@ -36,7 +35,7 @@ public class MMDao {
 	            ds.setUser(username);
 	            ds.setPassword(password);
 			
-	            con = ds.getConnection();
+	            con = ds.getConnection();*/
 	            
 		}
 		catch(Exception exc) {
